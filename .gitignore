@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Angular build and cache
+**/dist/
+**/.angular/
+
+# Environment and debug files
+.env
+.env.*
+npm-debug.log*
+
+# IDE and operating system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Database credentials
+apre-server/src/utils/config.js
