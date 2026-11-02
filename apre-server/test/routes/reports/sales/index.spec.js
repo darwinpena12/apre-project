@@ -143,3 +143,88 @@ describe('Apre Sales Report API - Sales by Region', () => {
     });
   });
 });
+
+// Test the sales report API
+
+describe('Apre Sales Report API - Sales by Time Period', () => {
+  beforeEach(() => {
+    mongo.mockClear();
+  });
+
+  it('should fetch sales data grouped by day within a date range', async () => {
+    mongo.mockImplementation(async (callback) => {
+      const db = {
+        collection: jest.fn().mockReturnThis(),
+        aggregate: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockResolvedValue([
+            { 
+              date: '2023-09-01', 
+              totalSales: 2500 
+            },
+            {
+              date: '2023-09-02', 
+              totalSales: 3500
+            }
+          ])
+        })
+      };
+      await callback(db);
+    });
+    
+    const response = await request(app)
+    .get('/api/reports/sales/by-time-period').query({ 
+      startDate: '2023-09-01', 
+      endDate: '2023-09-02' 
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([
+      {
+        date: '2023-09-01',
+        totalSales: 2500
+      },
+      {
+        date: '2023-09-02',
+        totalSales: 3500
+      }
+    ]);
+  });
+
+  it('should return an empty array if no sales are found within the date range', async () => {
+    mongo.mockImplementation(async (callback) => {
+      const db = {
+        collection: jest.fn().mockReturnThis(),
+        aggregate: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockResolvedValue([])
+        })
+      };
+      await callback(db);
+    });
+
+    const response = await request(app)
+    .get('/api/reports/sales/by-time-period')
+    .query({ 
+      startDate: '2023-09-01', 
+      endDate: '2023-09-02' 
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([]);
+  });
+
+  it('should return 400 if the date parameters are missing or invalid', async () => {
+    const missingDateResponse = await request(app)
+    .get('/api/reports/sales/by-time-period');
+
+    expect(missingDateResponse.status).toBe(400);
+
+    const invalidDateResponse = await request(app)
+    .get('/api/reports/sales/by-time-period')
+    .query({ 
+      startDate: 'invalid-date', 
+      endDate: '2023-09-02' 
+    });
+
+    expect(invalidDateResponse.status).toBe(400);
+  });
+});

@@ -78,4 +78,71 @@ router.get('/regions/:region', (req, res, next) => {
   }
 });
 
+/**
+ * @description
+ *
+ * GET /by-time-period
+ * 
+ * Fetches sales data within a specified date range, grouped by day
+ */
+
+router.get('/by-time-period', (req, res, next) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).send({ 
+        message: 'Start date and end date are required.'
+      });
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || start > end) {
+      return res.status(400).send({ 
+        message: 'Please provide a valid date range.'
+      });
+    }
+
+    // Include the entire selected end date.
+    end.setUTCDate(end.getUTCDate() + 1);
+
+    mongo(async db => {
+      const salesReportByTimePeriod = await db.collection('sales').aggregate([
+        {
+          $match: {
+            date: { $gte: start, $lt: end }
+          }
+        },
+        {
+          $group: {
+            _id: { 
+              $dateToString: { 
+                format: '%Y-%m-%d', 
+                date: '$date', 
+                timezone: 'UTC' 
+              } 
+            },
+            totalSales: { $sum: '$amount' }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            date: '$_id',
+            totalSales: 1
+          }
+        },
+        {
+          $sort: { date: 1 }
+        }
+      ]).toArray();
+      res.send(salesReportByTimePeriod);
+    }, next);
+  } catch (err) {
+    console.error('Error getting sales data for time period: ', err);
+    next(err);
+  }
+});
 module.exports = router;
