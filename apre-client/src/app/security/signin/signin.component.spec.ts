@@ -48,4 +48,13 @@ describe('SigninComponent', () => {
     expect(component.signinForm.valid).toBeFalse();
     expect(component.errorMessage).toBe('Please fill in all fields.');
   });
+
+  // M-030: Verify that the submit button displays the expected tooltip text.
+  it('should display the tooltip on the submit button', () => {
+    const compiled = fixture.nativeElement;
+    const submitButton = compiled.querySelector('.signin__button');
+
+    expect(submitButton).toBeTruthy();
+    expect(submitButton.getAttribute('title')).toBe('Click to sign in');
+  });
 });
