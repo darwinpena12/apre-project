@@ -1,0 +1,14 @@
+<div>
+  <h1>Agent Performance By Region</h1>
+
+  <div *ngIf="showChart" class="chart-container">
+    <div class="card chart-card">
+      <app-chart
+        [type]="'bar'"
+        [label]="'Average Agent Performance'"
+        [data]="averagePerformance"
+        [labels]="regions">
+      </app-chart>
+    </div>
+  </div>
+</div>

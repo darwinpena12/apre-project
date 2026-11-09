@@ -1,10 +1,12 @@
-# APRE - Sales by Time Period
+# APRE - Advanced Project Reporting Environment
 
 ## Project Overview
 
 The APRE (Advanced Project Reporting Environment) application provides reporting features that help users review and analyze sales data.
 
 This project implements task M-071, Sales by Time Period, which allows users to select a start date and an end date to retrieve sales information within a specified period. The results are grouped by day and displayed in a bar chart showing the total sales for each date.
+
+It also includes task M-087, Agent Performance by Region, which retrieves agent performance data grouped by region and displays the average performance for each region in a bar chart.
 
 ## M-071 - Sales by Time Period
 
@@ -22,7 +24,55 @@ UTC is used for consistent date grouping.
 
 The backend endpoint is GET /api/reports/sales/by-time-period.
 
-Additional Improvements
+## M-087 - Agent Performance by Region
+
+Added a report that retrieves agent performance data grouped by region and displays the average performance for each region in a bar chart.
+
+### Implementation Details
+
+Retrieves data from the agentPerformance MongoDB collection.
+
+Groups performance records using the region field.
+
+Calculates the average of the performance metric values for each region.
+
+Sorts the results alphabetically by region.
+
+Displays the results using the shared ChartComponent.
+
+Added a navigation link under Agent Performance Reports.
+
+### Backend Endpoint
+
+GET /api/reports/agent-performance/by-region
+
+### Unit Testing
+
+Added three backend unit tests covering successful results, empty results, and database errors.
+
+Added three Angular unit tests covering component creation, report title, and retrieval and display of regional performance data.
+
+# Additional Improvements
+
+## M-030 - Sign-In Submit Button Tooltip
+
+Added a tooltip to the SigninComponent submit button to clarify its purpose when users hover over it.
+
+Implementation Details
+
+Added the HTML title attribute with the text "Click to sign in" to the Submit button.
+
+Added a code comment explaining the change.
+
+Updated apre-client/src/app/security/signin/signin.component.ts.
+
+Unit Testing
+
+Added a unit test in apre-client/src/app/security/signin/signin.component.spec.ts to verify that the submit button displays the expected tooltip text.
+
+Verified that the tooltip attribute contains "Click to sign in".
+
+GitHub Commit: 17e79be
 
 ## M-054 - Table Pagination Indicator
 

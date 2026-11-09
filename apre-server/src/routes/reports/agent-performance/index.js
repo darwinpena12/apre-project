@@ -93,4 +93,45 @@ router.get('/call-duration-by-date-range', (req, res, next) => {
   }
 });
 
+/**
+ * @description
+ *
+ * GET /by-region
+ *
+ * Fetches average agent performance grouped by region.
+ */
+router.get('/by-region', (req, res, next) => {
+  try {
+    mongo(async db => {
+      const agentPerformanceByRegion = await db.collection('agentPerformance').aggregate([
+        {
+          $group: {
+            _id: '$region',
+            averagePerformance: {
+              $avg: { $avg: '$performanceMetrics.value' }
+            }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            region: '$_id',
+            averagePerformance: 1
+          }
+        },
+        {
+          $sort: {
+            region: 1
+          }
+        }
+      ]).toArray();
+
+      res.send(agentPerformanceByRegion);
+    }, next);
+  } catch (err) {
+    console.error('Error getting agent performance by region: ', err);
+    next(err);
+  }
+});
+
 module.exports = router;

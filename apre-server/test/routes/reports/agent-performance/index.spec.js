@@ -72,4 +72,66 @@ describe('Apre Agent Performance API', () => {
       type: 'error'
     });
   });
+
+  // Test the by-region endpoint
+  it('should fetch average agent performance grouped by region', async () => {
+    mongo.mockImplementation(async (callback) => {
+      const db = {
+        collection: jest.fn().mockReturnThis(),
+        aggregate: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockResolvedValue([
+            { region: 'Africa', averagePerformance: 81 },
+            { region: 'Asia', averagePerformance: 80 },
+            { region: 'Australia', averagePerformance: 80 },
+            { region: 'Europe', averagePerformance: 79 },
+            { region: 'North America', averagePerformance: 80 },
+            { region: 'South America', averagePerformance: 78 }
+          ])
+        })
+      };
+      await callback(db);
+    });
+
+    const response = await request(app).get('/api/reports/agent-performance/by-region');
+
+    expect(response.status).toBe(200);
+
+    expect(response.body).toEqual([
+      { region: 'Africa', averagePerformance: 81 },
+      { region: 'Asia', averagePerformance: 80 },
+      { region: 'Australia', averagePerformance: 80 },
+      { region: 'Europe', averagePerformance: 79 },
+      { region: 'North America', averagePerformance: 80 },
+      { region: 'South America', averagePerformance: 78 }
+    ]);
+  });
+
+  // Test the by-region endpoint when no records are found
+  it('should return an empty array when no agent performance records exist', async () => {
+    mongo.mockImplementation(async (callback) => {
+      const db = {
+        collection: jest.fn().mockReturnThis(),
+        aggregate: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockResolvedValue([])
+        })
+      };
+      await callback(db);
+    });
+
+    const response = await request(app).get('/api/reports/agent-performance/by-region');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([]);
+  });
+
+  // Test the by-region endpoint when a database error occurs
+  it('should return 500 when a database error occurs', async () => {
+    mongo.mockImplementation(async (callback, next) => {
+      next(new Error('Database connection failed'));
+    });
+
+    const response = await request(app).get('/api/reports/agent-performance/by-region');
+
+    expect(response.status).toBe(500);
+  });
 });
