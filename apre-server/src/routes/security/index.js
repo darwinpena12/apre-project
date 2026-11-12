@@ -13,6 +13,15 @@ const bcrypt = require('bcryptjs');
 const { mongo } = require('../../utils/mongo');
 const createError = require('http-errors');
 
+// Darwin Pena Cabrera
+// Added Ajv to validate Sign-In API request data before database operations.
+const Ajv = require('ajv');
+const { signInSchema } = require('../../schemas');
+
+// Initialize Ajv and compile the Sign-In validation schema.
+const ajv = new Ajv();
+const validateSignIn = ajv.compile(signInSchema);
+
 const router = express.Router(); // Creates a new router object
 
 /**
@@ -40,7 +49,15 @@ const router = express.Router(); // Creates a new router object
  */
 router.post('/signin', (req, res, next) => {
   try {
-    const { username, password } = req.body; // Destructure the username and password from the request body
+    // Validate the request body before accessing the database.
+    const valid = validateSignIn(req.body);
+
+    if (!valid) {
+      return next(createError(400, ajv.errorsText(validateSignIn.errors)));
+    }
+
+    // Destructure the username and password after successful validation.
+    const { username, password } = req.body;
 
     mongo(async db => {
       // Find the user by username
