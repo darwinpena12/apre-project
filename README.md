@@ -74,6 +74,34 @@ Verified that the tooltip attribute contains "Click to sign in".
 
 GitHub Commit: 17e79be
 
+## M-042 - Ajv Sign-In API Validation
+
+Added Ajv validation to the Sign-In API to verify incoming request data before accessing the database.
+
+Implementation Details
+
+Created a JSON validation schema in apre-server/src/schemas.js.
+
+Added validation for the required username and password fields, including password format requirements.
+
+Integrated Ajv into apre-server/src/routes/security/index.js to reject invalid requests with an HTTP 400 response before accessing MongoDB.
+
+Backend Endpoint
+
+POST /api/security/signin
+
+Before: The original Sign-In route did not validate the request body before accessing the database.
+
+After: The updated route validates the request body using Ajv and rejects invalid data before database operations.
+
+Unit Testing
+
+Added four backend unit tests in apre-server/test/routes/security/index.spec.js covering missing usernames, invalid password formats, successful authentication, and incorrect passwords.
+
+All four Sign-In API tests passed successfully. The complete backend test suite also passed, with all 35 tests across seven test suites.
+
+GitHub Commit: 7a1da78
+
 ## M-054 - Table Pagination Indicator
 
 Updated the shared TableComponent pagination section to display both the current page number and the total number of available pages.
